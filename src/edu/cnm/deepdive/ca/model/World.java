@@ -1,7 +1,10 @@
 package edu.cnm.deepdive.ca.model;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Random;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 public class World {
 
@@ -11,6 +14,7 @@ public class World {
   private Cell[][] next;
   private long generation;
   private final Object lock = new Object();
+  private long checksum;
 
   public World() {
 
@@ -42,11 +46,18 @@ public class World {
   }
 
   public void tick() {
+    Checksum checksum = new CRC32();
+    BitSet bitSet = new BitSet(terrain[0].length);
     for (int row = 0; row < terrain.length; row++) {
       for (int col = 0; col < terrain[row].length; col++) {
         next[row][col] = terrain[row][col].next(terrain, row, col);
+        bitSet.set(col, next[row][col] == Cell.ALIVE);
       }
+      byte[] rowBytes = bitSet.toByteArray();
+      checksum.update(rowBytes, 0, rowBytes.length);
+
     }
+    this.checksum = checksum.getValue();
     synchronized (lock) {
       for (int row = 0; row < terrain.length; row++) {
         System.arraycopy(next[row], 0, terrain[row], 0, next[row].length);
@@ -65,6 +76,10 @@ public class World {
 
   public long getGeneration() {
     return generation;
+  }
+
+  public long getChecksum() {
+    return checksum;
   }
 
   @Override
