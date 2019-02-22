@@ -4,7 +4,7 @@ public enum Cell {
   DEAD {
     @Override
     public Cell next(Cell[][] terrain, int row, int column) {
-      return livingNeighbors(terrain, row, column) == 3 ? ALIVE : DEAD;
+      return (livingNeighbors(terrain, row, column) == 3) ? ALIVE : DEAD;
     }
   },
   ALIVE {
@@ -35,6 +35,5 @@ public enum Cell {
     }
     return count;
   }
-
 
 }
